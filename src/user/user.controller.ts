@@ -1,6 +1,8 @@
 import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
+import { UserRoles, UseRoles, ACGuard } from 'nest-access-control';
 import { UserService } from './user.service';
 import { AuthJWTGuard } from 'src/shared/authJWT.guard';
+import { AuthzGuard } from 'src/shared/authz.guard';
 
 @Controller()
 export class UserController {
@@ -10,7 +12,12 @@ export class UserController {
     }
 
     @Get('api/user')
-    @UseGuards(new AuthJWTGuard())
+    @UseGuards(new AuthJWTGuard(), new AuthzGuard(), ACGuard)
+    @UseRoles({
+        resource: 'user',
+        action: 'read',
+        possession: 'any',
+    })
     async showUsers (){
         return await this.userService.allUsers();
     }
